@@ -35,6 +35,17 @@ uv run plans/<name>/<name>_001.py
 
 Custom skills are located in the `.skills/` folder.
 
+## PDF / Paper Text Extraction
+
+When an agent needs to read a paper PDF, convert it to Markdown first so the structure is easier to parse.
+
+Preferred CLI:
+
+```console
+cargo binstall pdf_oxide_cli
+pdf-oxide markdown paper.pdf -o paper.md
+```
+
 ## Execution Mindset
 
 Think in agent mode, not human mode.
