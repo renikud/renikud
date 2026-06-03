@@ -14,7 +14,7 @@ This works because Hebrew has a nearly one-to-one letter→phoneme structure: ea
 
 `G2PModel` in `src/model.py`:
 
-1. **Encoder** — ModernBERT-style encoder initialized from scratch with a custom 104-token Hebrew character vocabulary. See `src/encoder.py` for the exact configuration (~19M params).
+1. **Encoder** — `dicta-il/dictabert-large-char` loaded through Hugging Face `AutoModel`. `src/encoder.py` returns the bare encoder body, without an MLM head.
 2. **Three coupled classification heads** — each head sees the encoder hidden state *plus* the raw logits from the previous head, so later heads have information about earlier predictions rather than being blind to them:
    - **Consonant head** → `hidden` → 26 classes (`∅ b v d h z χ t j k l m n s f p ts tʃ w ʔ ɡ ʁ ʃ ʒ dʒ`)
    - **Vowel head** → `hidden + consonant_logits` → 7 classes (`∅ a e i o u`)
@@ -25,12 +25,9 @@ At inference (`src/infer.py`), the consonant mask is applied before argmax so th
 
 ## Tokenizer
 
-Custom character-level tokenizer (`src/tokenization.py`) with a 104-token vocab:
-- 5 special tokens: `[PAD] [CLS] [SEP] [UNK] [MASK]`
-- Hebrew letters א–ת (including final forms) + maqaf, geresh, gershayim
-- ASCII lowercase, digits, punctuation, space
+`src/tokenization.py` loads the `dicta-il/dictabert-large-char` tokenizer with `AutoTokenizer`.
 
-Each character is its own token. The tokenizer is built deterministically from code — no external file needed until `save_tokenizer()` is called.
+The default BERT pre-tokenizer is replaced with a character-level splitter so each input character gets its own token and a usable `offset_mapping`. This keeps label alignment per character while using DictaBERT's pretrained vocabulary and special-token handling.
 
 ## Hebrew Markers
 

@@ -8,7 +8,7 @@
 ./scripts/train_prepare.sh dataset/data.tsv
 ```
 
-### 2. Train from scratch
+### 2. Train
 
 ```console
 ./scripts/train_scratch.sh
@@ -70,21 +70,11 @@ uv sync --extra cu130  # CUDA 13.0
 uv sync --extra cu128  # CUDA 12.8
 ```
 
-## xFormers
-
-xFormers must match your PyTorch CUDA version. If you see a version mismatch warning (e.g. built for cu128 but you have cu130), build from source:
-
-```console
-pip install xformers --no-binary xformers
-```
-
-Note: `pyproject.toml` pins PyTorch to the `pytorch-cu130` index. If your system uses a different CUDA version, remove or update that index entry before installing.
-
 ## Flash Attention
 
-ModernBERT supports Flash Attention 2 for faster training and lower VRAM usage. Enable with `--flash-attention`:
+DictaBERT is loaded through Hugging Face Transformers. If the active encoder/backend supports Flash Attention, enable it with `--flash-attention`:
 
-Install a prebuilt wheel first:
+Install a compatible prebuilt wheel first:
 
 - **x86_64**: https://github.com/mjun0812/flash-attention-prebuild-wheels
 - **aarch64 (ARM)**: https://pypi.jetson-ai-lab.io/sbsa/cu130
@@ -92,11 +82,6 @@ Install a prebuilt wheel first:
 ```console
 ./scripts/train_scratch.sh --flash-attention
 ```
-
-Install a prebuilt wheel first:
-
-- **x86_64**: https://github.com/mjun0812/flash-attention-prebuild-wheels
-- **aarch64 (ARM)**: https://pypi.jetson-ai-lab.io/sbsa/cu130
 
 Validate:
 
@@ -106,7 +91,7 @@ uv run python -c "import flash_attn; print(flash_attn.__version__)"
 
 ## Learning Rates
 
-- `--encoder-lr 2e-5` — default for training from scratch
+- `--encoder-lr 2e-5` — default encoder learning rate
 - `--head-lr 1e-4` — higher LR for the three classification heads
 - For fine-tuning use lower rates: `--encoder-lr 2e-6 --head-lr 1e-5`
 
