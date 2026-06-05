@@ -31,3 +31,5 @@ model-he/
 *.wav
 *.tar.gz
 backup_checkpoints/
+models/
+plans/*.pdf

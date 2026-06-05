@@ -17,33 +17,6 @@ dependencies = [
     "accelerate>=1.12.0",
 ]
 
-[project.optional-dependencies]
-cu130 = ["torch>=2.10.0"]
-cu128 = ["torch>=2.10.0"]
-
-[tool.uv]
-conflicts = [
-  [{ extra = "cu130" }, { extra = "cu128" }],
-]
-
-# CUDA Config
-
-[[tool.uv.index]]
-name = "pytorch-cu130"
-url = "https://download.pytorch.org/whl/cu130"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cu128"
-url = "https://download.pytorch.org/whl/cu128"
-explicit = true
-
-[tool.uv.sources]
-torch = [
-  { index = "pytorch-cu130", extra = "cu130" },
-  { index = "pytorch-cu128", extra = "cu128" },
-]
-
 # Makes src/ importable without sys.path hacks — uv run scripts/* just works
 [build-system]
 requires = ["setuptools"]

@@ -2,7 +2,7 @@
 Benchmark the Hebrew G2P classifier model against ground truth phonemes.
 
 Download benchmark data first:
-    wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/gt.tsv
+    wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/web/data/gt.tsv
 
 Usage:
     uv run scripts/benchmark_classifier.py --checkpoint outputs/g2p-classifier/checkpoint-5000 --gt gt.tsv
