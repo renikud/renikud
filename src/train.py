@@ -24,7 +24,7 @@ from tqdm import tqdm
 
 from safetensors.torch import load_file
 
-from checkpoint import resume_step, save_checkpoint, save_epoch_checkpoint, save_best_checkpoint
+from checkpoint import resume_step, save_named_checkpoint
 from config import parse_args
 from data import make_dataloaders
 from eval import evaluate
@@ -71,6 +71,8 @@ def main():
     )
 
     best_wer = float("inf")
+    best_cer = float("inf")
+    best_loss = float("inf")
     best_acc = 0.0
     best_wer_step = 0
     no_improve_count = 0
@@ -131,9 +133,21 @@ def main():
                     if opt_step % args.save_steps == 0:
                         metrics = evaluate(accelerator.unwrap_model(model), eval_loader, device, args.fp16, tokenizer)
                         log_eval_metrics(metrics, writer, opt_step, f"step {opt_step}")
-                        save_checkpoint(accelerator.unwrap_model(model), tokenizer, output_dir, opt_step, metrics["mean_acc"], args.save_total_limit)
-                        if args.save_best and save_best_checkpoint(accelerator.unwrap_model(model), tokenizer, output_dir, metrics["wer"], None, opt_step):
-                            print(f"[step {opt_step}] New best WER={metrics['wer']:.4f} → saved to {output_dir}/best")
+                        unwrapped_model = accelerator.unwrap_model(model)
+                        if args.save_last:
+                            save_named_checkpoint(unwrapped_model, tokenizer, output_dir / "last", opt_step, metrics)
+                            print(f"[step {opt_step}] saved last to {output_dir}/last")
+                        if args.save_best_cer and metrics["cer"] < best_cer:
+                            best_cer = metrics["cer"]
+                            save_named_checkpoint(unwrapped_model, tokenizer, output_dir / "best_cer", opt_step, metrics)
+                            print(f"[step {opt_step}] New best CER={metrics['cer']:.4f} → saved to {output_dir}/best_cer")
+                        if args.save_best_wer and metrics["wer"] < best_wer:
+                            save_named_checkpoint(unwrapped_model, tokenizer, output_dir / "best_wer", opt_step, metrics)
+                            print(f"[step {opt_step}] New best WER={metrics['wer']:.4f} → saved to {output_dir}/best_wer")
+                        if args.save_best_loss and metrics["eval_loss"] < best_loss:
+                            best_loss = metrics["eval_loss"]
+                            save_named_checkpoint(unwrapped_model, tokenizer, output_dir / "best_loss", opt_step, metrics)
+                            print(f"[step {opt_step}] New best loss={metrics['eval_loss']:.4f} → saved to {output_dir}/best_loss")
                         if metrics["wer"] < best_wer:
                             best_wer = metrics["wer"]
                             best_acc = 1.0 - metrics["wer"]
@@ -144,15 +158,11 @@ def main():
                             no_improve_count += 1
                             print(f"[step {opt_step}] word acc: {(1.0 - metrics['wer']) * 100:.2f}%  ↓ best: {best_acc * 100:.2f}% @ step {best_wer_step}  (stuck for {no_improve_count} evals)")
 
-        if args.save_epochs and accelerator.is_main_process:
-            metrics = evaluate(accelerator.unwrap_model(model), eval_loader, device, args.fp16, tokenizer)
-            log_eval_metrics(metrics, writer, opt_step, f"epoch {epoch + 1}")
-            save_epoch_checkpoint(accelerator.unwrap_model(model), tokenizer, output_dir, epoch + 1, opt_step, metrics["mean_acc"])
-
     if accelerator.is_main_process:
         metrics = evaluate(accelerator.unwrap_model(model), eval_loader, device, args.fp16, tokenizer)
         log_eval_metrics(metrics, writer, opt_step, "final")
-        save_checkpoint(accelerator.unwrap_model(model), tokenizer, output_dir, opt_step, metrics["mean_acc"], args.save_total_limit)
+        if args.save_last:
+            save_named_checkpoint(accelerator.unwrap_model(model), tokenizer, output_dir / "last", opt_step, metrics)
         writer.close()
 
 

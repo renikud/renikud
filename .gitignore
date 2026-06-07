@@ -33,3 +33,4 @@ model-he/
 backup_checkpoints/
 models/
 plans/*.pdf
+data/

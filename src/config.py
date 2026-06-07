@@ -21,7 +21,6 @@ def parse_args():
     parser.add_argument("--warmup-steps", type=int, default=200)
     parser.add_argument("--logging-steps", type=int, default=50)
     parser.add_argument("--save-steps", type=int, default=500)
-    parser.add_argument("--save-total-limit", type=int, default=20)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=1)
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
     parser.add_argument("--freeze-encoder-steps", type=int, default=0)
@@ -32,8 +31,10 @@ def parse_args():
         action=argparse.BooleanOptionalAction,
         default=torch.cuda.is_available(),
     )
-    parser.add_argument("--save-epochs", action="store_true", default=False, help="Save a checkpoint at the end of each epoch (never pruned)")
-    parser.add_argument("--save-best", action="store_true", default=False, help="Save best checkpoint by WER to output_dir/best/")
+    parser.add_argument("--save-last", action="store_true", default=False, help="Overwrite output_dir/last at every eval")
+    parser.add_argument("--save-best-cer", action="store_true", default=False, help="Overwrite output_dir/best_cer when eval CER improves")
+    parser.add_argument("--save-best-wer", action="store_true", default=False, help="Overwrite output_dir/best_wer when eval WER improves")
+    parser.add_argument("--save-best-loss", action="store_true", default=False, help="Overwrite output_dir/best_loss when eval loss improves")
     parser.add_argument("--flash-attention", action="store_true", default=False)
     parser.add_argument("--dataloader-workers", type=int, default=0)
     return parser.parse_args()
