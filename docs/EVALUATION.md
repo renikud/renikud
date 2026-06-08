@@ -32,7 +32,7 @@ The benchmark is [heb-g2p-benchmark](https://github.com/thewh1teagle/heb-g2p-ben
 
 Download:
 ```console
-wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/gt.tsv
+wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/web/data/gt.tsv
 ```
 
 ## Results

@@ -10,7 +10,7 @@
 Benchmark renikud-onnx model against ground truth phonemes.
 
 Download benchmark data first:
-    wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/gt.tsv
+    wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/web/data/gt.tsv
 
 Usage:
     uv run scripts/benchmark.py --model model.onnx --gt gt.tsv
@@ -39,7 +39,7 @@ def main():
 
     if not Path(args.gt).exists():
         print(f"Error: {args.gt} not found. Download with:")
-        print("wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/gt.tsv")
+        print("wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/web/data/gt.tsv")
         return
 
     g2p = G2P(args.model)

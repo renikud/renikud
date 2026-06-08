@@ -41,7 +41,7 @@ def main():
 
     if not Path(args.gt).exists():
         print(f"Error: {args.gt} not found. Download with:")
-        print("wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/gt.tsv")
+        print("wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/web/data/gt.tsv")
         return
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

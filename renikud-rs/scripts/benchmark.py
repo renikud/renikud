@@ -57,7 +57,7 @@ def main():
 
     if not Path(args.gt).exists():
         print(f"Error: {args.gt} not found. Download with:")
-        print("wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/gt.tsv")
+        print("wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/web/data/gt.tsv")
         sys.exit(1)
 
     if not Path(args.model).exists():

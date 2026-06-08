@@ -7,6 +7,7 @@ import jiwer
 
 from constants import IGNORE_INDEX
 from decoder import decode
+from tokenization import id_to_token
 
 
 def compute_accuracy(logits: torch.Tensor, labels: torch.Tensor) -> float:
@@ -34,6 +35,7 @@ def decode_batch(texts: list[str], out: dict, tokenizer) -> list[str]:
 
 def evaluate(model, eval_loader, device, fp16: bool, tokenizer) -> dict:
     model.eval()
+    tokenizer_vocab = id_to_token(tokenizer)
     total_loss = 0.0
     consonant_acc_sum = vowel_acc_sum = stress_acc_sum = 0.0
     n = 0
@@ -46,7 +48,7 @@ def evaluate(model, eval_loader, device, fp16: bool, tokenizer) -> dict:
             batch = {k: v.to(device) for k, v in batch.items()}
 
             with torch.autocast("cuda", enabled=fp16):
-                out = model(**batch)
+                out = model(**batch, tokenizer_vocab=tokenizer_vocab)
 
             total_loss += out["loss"].item()
             consonant_acc_sum += compute_accuracy(out["consonant_logits"], batch["consonant_labels"])
