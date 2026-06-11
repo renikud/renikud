@@ -18,9 +18,10 @@ os.environ["ONNX_EXPORT"] = "1"
 import onnx
 import torch
 from onnxruntime.quantization import QuantType, quantize_dynamic
+from safetensors.torch import load_file
 from phonology import CONSONANTS, VOWELS
-from infer import load_checkpoint
 from model import G2PModel
+from train_distill import StudentG2PModel
 from phonology import HEBREW_LETTER_CONSONANT_IDS as HEBREW_LETTER_TO_ALLOWED_CONSONANTS, HEBREW_LETTER_CONSONANTS, LETTERS_WITH_GERESH
 from tokenization import load_tokenizer
 
@@ -43,6 +44,16 @@ def add_metadata(onnx_model, vocab: dict, tokenizer) -> None:
     add("geresh_map", {letter: HEBREW_LETTER_CONSONANTS[letter][1] for letter in LETTERS_WITH_GERESH if letter in HEBREW_LETTER_CONSONANTS and len(HEBREW_LETTER_CONSONANTS[letter]) >= 2})
 
 
+def load_model(checkpoint_dir: str):
+    state = load_file(str(Path(checkpoint_dir) / "model.safetensors"), device="cpu")
+    if any(key.startswith("encoder.layers.") for key in state):
+        model = StudentG2PModel()
+    else:
+        model = G2PModel()
+    model.load_state_dict(state, strict=True)
+    return model
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", required=True)
@@ -54,8 +65,7 @@ def main():
     vocab = tokenizer.get_vocab()  # {token: id}
     tokenizer_vocab = {v: k for k, v in vocab.items()}  # {id: token}
 
-    model = G2PModel()
-    load_checkpoint(model, args.checkpoint)
+    model = load_model(args.checkpoint)
     if args.int8:
         model.float().eval()
     else:
