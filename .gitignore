@@ -11,7 +11,8 @@ wheels/
 
 *.7z
 *.txt
-plans/overfit/dataset/
+plans/*
+!plans/.gitkeep
 dataset/*
 !dataset/.gitkeep
 dataset_finetune/
@@ -32,5 +33,4 @@ model-he/
 *.tar.gz
 backup_checkpoints/
 models/
-plans/*.pdf
 data/
