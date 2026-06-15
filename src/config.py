@@ -31,10 +31,10 @@ def parse_args():
         action=argparse.BooleanOptionalAction,
         default=torch.cuda.is_available(),
     )
-    parser.add_argument("--save-last", action="store_true", default=False, help="Overwrite output_dir/last at every eval")
-    parser.add_argument("--save-best-cer", action="store_true", default=False, help="Overwrite output_dir/best_cer when eval CER improves")
-    parser.add_argument("--save-best-wer", action="store_true", default=False, help="Overwrite output_dir/best_wer when eval WER improves")
-    parser.add_argument("--save-best-loss", action="store_true", default=False, help="Overwrite output_dir/best_loss when eval loss improves")
+    parser.add_argument("--save-last", action="store_true", default=True, help="Overwrite output_dir/last at every eval")
+    parser.add_argument("--save-best-cer", action="store_true", default=True, help="Overwrite output_dir/best_cer when eval CER improves")
+    parser.add_argument("--save-best-wer", action="store_true", default=True, help="Overwrite output_dir/best_wer when eval WER improves")
+    parser.add_argument("--save-best-loss", action="store_true", default=True, help="Overwrite output_dir/best_loss when eval loss improves")
     parser.add_argument("--flash-attention", action="store_true", default=False)
     parser.add_argument("--dataloader-workers", type=int, default=0)
     return parser.parse_args()
