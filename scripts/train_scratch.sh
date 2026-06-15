@@ -3,8 +3,8 @@ set -euo pipefail
 
 # Usage:
 #   ./scripts/train_scratch.sh                                      # train from scratch
-#   ./scripts/train_scratch.sh --resume outputs/.../checkpoint-N   # resume training
-#   ./scripts/train_scratch.sh --resume outputs/.../checkpoint-N --reset-steps  # finetune (load weights, reset steps)
+#   ./scripts/train_scratch.sh --resume runs/.../checkpoint-N      # resume training
+#   ./scripts/train_scratch.sh --resume runs/.../checkpoint-N --reset-steps  # finetune (load weights, reset steps)
 
 RESUME=""
 RESET_STEPS=""
@@ -19,9 +19,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 uv run accelerate launch src/train.py \
-  --train-dataset dataset/.cache/train \
-  --eval-dataset dataset/.cache/val \
-  --output-dir outputs/g2p-classifier \
   $RESUME \
   $RESET_STEPS \
   "${EXTRA[@]+"${EXTRA[@]}"}"

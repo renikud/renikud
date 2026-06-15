@@ -9,9 +9,9 @@ import torch
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train the Hebrew G2P classifier model")
-    parser.add_argument("--train-dataset", type=str, required=True)
-    parser.add_argument("--eval-dataset", type=str, required=True)
-    parser.add_argument("--output-dir", type=str, required=True)
+    parser.add_argument("--train-dataset", type=str, default="data/.cache/train")
+    parser.add_argument("--eval-dataset", type=str, default="data/.cache/val")
+    parser.add_argument("--output-dir", type=str, default="runs/g2p-classifier")
     parser.add_argument("--train-batch-size", type=int, default=16)
     parser.add_argument("--eval-batch-size", type=int, default=16)
     parser.add_argument("--epochs", type=float, default=3.0)
@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument("--weight-decay", type=float, default=0.01)
     parser.add_argument("--warmup-steps", type=int, default=200)
     parser.add_argument("--logging-steps", type=int, default=50)
-    parser.add_argument("--save-steps", type=int, default=500)
+    parser.add_argument("--eval-minutes", type=float, default=5.0)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=1)
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
     parser.add_argument("--freeze-encoder-steps", type=int, default=0)

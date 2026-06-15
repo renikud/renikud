@@ -2,36 +2,45 @@
 
 Example:
     uv run src/train.py \
-        --train-dataset dataset/.cache/classifier-train \
-        --eval-dataset dataset/.cache/classifier-val \
-        --output-dir outputs/g2p-classifier
+        --train-dataset data/.cache/classifier-train \
+        --eval-dataset data/.cache/classifier-val \
+        --output-dir runs/g2p-classifier
 
 Multi-GPU:
     accelerate launch src/train.py \
-        --train-dataset dataset/.cache/train \
-        --eval-dataset dataset/.cache/val \
-        --output-dir outputs/g2p-classifier
+        --train-dataset data/.cache/train \
+        --eval-dataset data/.cache/val \
+        --output-dir runs/g2p-classifier
 """
 
 from __future__ import annotations
 
 import math
+import time
 from pathlib import Path
 
+import torch
 from torch.utils.tensorboard import SummaryWriter
 from accelerate import Accelerator
+from accelerate.utils import broadcast
 from tqdm import tqdm
 
 from safetensors.torch import load_file
 
-from checkpoint import resume_step, save_named_checkpoint
+from checkpoint import resume_step
 from config import parse_args
 from data import make_dataloaders
-from eval import evaluate
-from metrics import log_train_metrics, log_eval_metrics
+from eval import evaluate_and_save, make_eval_state
+from metrics import log_train_metrics
 from model import G2PModel
 from optimizer import build_optimizer, build_scheduler
 from tokenization import load_tokenizer
+
+
+def should_eval_now(accelerator: Accelerator, last_eval_at: float, interval_seconds: float, device) -> bool:
+    due = time.monotonic() - last_eval_at >= interval_seconds if accelerator.is_main_process else False
+    due_tensor = torch.tensor(int(due), device=device)
+    return bool(broadcast(due_tensor, from_process=0).item())
 
 
 def main():
@@ -70,12 +79,7 @@ def main():
         model, optimizer, train_loader, eval_loader, scheduler
     )
 
-    best_wer = float("inf")
-    best_cer = float("inf")
-    best_loss = float("inf")
-    best_acc = 0.0
-    best_wer_step = 0
-    no_improve_count = 0
+    eval_state = make_eval_state()
     opt_step = 0
     if args.resume and not args.reset_steps:
         opt_step = resume_step(args.resume, scheduler)
@@ -84,6 +88,8 @@ def main():
 
     global_step = opt_step * args.gradient_accumulation_steps
     optimizer.zero_grad()
+    eval_interval_seconds = args.eval_minutes * 60.0
+    last_eval_at = time.monotonic()
 
     for epoch in range(math.ceil(args.epochs)):
         epoch_loss_sum = 0.0
@@ -130,40 +136,42 @@ def main():
                     if opt_step % args.logging_steps == 0:
                         log_train_metrics(train_loss, optimizer.param_groups[0]["lr"], optimizer.param_groups[2]["lr"], writer, opt_step)
 
-                    if opt_step % args.save_steps == 0:
-                        metrics = evaluate(accelerator.unwrap_model(model), eval_loader, device, args.fp16, tokenizer)
-                        log_eval_metrics(metrics, writer, opt_step, f"step {opt_step}")
-                        unwrapped_model = accelerator.unwrap_model(model)
-                        if args.save_last:
-                            save_named_checkpoint(unwrapped_model, tokenizer, output_dir / "last", opt_step, metrics)
-                            print(f"[step {opt_step}] saved last to {output_dir}/last")
-                        if args.save_best_cer and metrics["cer"] < best_cer:
-                            best_cer = metrics["cer"]
-                            save_named_checkpoint(unwrapped_model, tokenizer, output_dir / "best_cer", opt_step, metrics)
-                            print(f"[step {opt_step}] New best CER={metrics['cer']:.4f} → saved to {output_dir}/best_cer")
-                        if args.save_best_wer and metrics["wer"] < best_wer:
-                            save_named_checkpoint(unwrapped_model, tokenizer, output_dir / "best_wer", opt_step, metrics)
-                            print(f"[step {opt_step}] New best WER={metrics['wer']:.4f} → saved to {output_dir}/best_wer")
-                        if args.save_best_loss and metrics["eval_loss"] < best_loss:
-                            best_loss = metrics["eval_loss"]
-                            save_named_checkpoint(unwrapped_model, tokenizer, output_dir / "best_loss", opt_step, metrics)
-                            print(f"[step {opt_step}] New best loss={metrics['eval_loss']:.4f} → saved to {output_dir}/best_loss")
-                        if metrics["wer"] < best_wer:
-                            best_wer = metrics["wer"]
-                            best_acc = 1.0 - metrics["wer"]
-                            best_wer_step = opt_step
-                            no_improve_count = 0
-                            print(f"[step {opt_step}] word acc: {(1.0 - metrics['wer']) * 100:.2f}%  ↑ new best!")
-                        else:
-                            no_improve_count += 1
-                            print(f"[step {opt_step}] word acc: {(1.0 - metrics['wer']) * 100:.2f}%  ↓ best: {best_acc * 100:.2f}% @ step {best_wer_step}  (stuck for {no_improve_count} evals)")
+                if should_eval_now(accelerator, last_eval_at, eval_interval_seconds, device):
+                    accelerator.wait_for_everyone()
+                    if accelerator.is_main_process:
+                        evaluate_and_save(
+                            accelerator,
+                            model,
+                            eval_loader,
+                            device,
+                            args,
+                            tokenizer,
+                            writer,
+                            output_dir,
+                            opt_step,
+                            f"step {opt_step}",
+                            eval_state,
+                        )
+                    accelerator.wait_for_everyone()
+                    last_eval_at = time.monotonic()
 
+    accelerator.wait_for_everyone()
     if accelerator.is_main_process:
-        metrics = evaluate(accelerator.unwrap_model(model), eval_loader, device, args.fp16, tokenizer)
-        log_eval_metrics(metrics, writer, opt_step, "final")
-        if args.save_last:
-            save_named_checkpoint(accelerator.unwrap_model(model), tokenizer, output_dir / "last", opt_step, metrics)
+        evaluate_and_save(
+            accelerator,
+            model,
+            eval_loader,
+            device,
+            args,
+            tokenizer,
+            writer,
+            output_dir,
+            opt_step,
+            "final",
+            eval_state,
+        )
         writer.close()
+    accelerator.wait_for_everyone()
 
 
 if __name__ == "__main__":

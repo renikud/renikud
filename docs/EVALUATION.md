@@ -10,14 +10,14 @@ All evaluation uses [jiwer](https://github.com/jitsi/jiwer) to compute:
 
 ### During Training
 
-`src/train.py` computes consonant accuracy, vowel accuracy, and stress accuracy on the validation split at each eval step.
+`src/train.py` computes consonant accuracy, vowel accuracy, and stress accuracy on the validation split at each timed eval interval.
 
 ### Standalone Benchmark
 
 `scripts/benchmark.py` evaluates a checkpoint against an external ground-truth file:
 
 ```console
-uv run scripts/benchmark.py --checkpoint outputs/my-run/checkpoint-1200 --gt gt.tsv
+uv run scripts/benchmark.py --checkpoint runs/my-run/checkpoint-1200 --gt gt.tsv
 ```
 
 Optional `--ignore-punct` strips `.,?!` from both references and predictions before scoring.

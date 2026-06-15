@@ -13,12 +13,11 @@ wheels/
 *.txt
 plans/*
 !plans/.gitkeep
-dataset/*
-!dataset/.gitkeep
+data/
 dataset_finetune/
 checkpoint/
 checkpoints/
-outputs/
+runs/
 *.tsv
 !src/aligner/testdata/*.tsv
 *.onnx
@@ -33,4 +32,3 @@ model-he/
 *.tar.gz
 backup_checkpoints/
 models/
-data/

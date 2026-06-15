@@ -2,8 +2,8 @@
 Export HebrewG2PClassifier to a self-contained ONNX file with vocab metadata embedded.
 
 Usage:
-    uv run scripts/export.py --checkpoint ../outputs/g2p-classifier-v3/checkpoint-1200 --output model.onnx
-    uv run scripts/export.py --checkpoint ../outputs/g2p-classifier-v3/checkpoint-1200 --output model.onnx --int8
+    uv run scripts/export.py --checkpoint ../runs/g2p-classifier-v3/checkpoint-1200 --output model.onnx
+    uv run scripts/export.py --checkpoint ../runs/g2p-classifier-v3/checkpoint-1200 --output model.onnx --int8
 """
 
 import argparse

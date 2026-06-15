@@ -1,7 +1,7 @@
 """Run inference with the Hebrew G2P classifier model.
 
 Usage:
-    uv run src/infer.py --checkpoint outputs/g2p-classifier/step-5000 --text "שלום עולם"
+    uv run src/infer.py --checkpoint runs/g2p-classifier/step-5000 --text "שלום עולם"
 """
 
 from __future__ import annotations

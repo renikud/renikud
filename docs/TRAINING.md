@@ -5,7 +5,7 @@
 ### 1. Prepare dataset
 
 ```console
-./scripts/train_prepare.sh dataset/data.tsv
+./scripts/train_prepare.sh data/data.tsv
 ```
 
 ### 2. Train
@@ -17,13 +17,13 @@
 ### 3. Fine-tune from a checkpoint
 
 ```console
-./scripts/train_finetune.sh outputs/g2p-classifier/checkpoint-5000
+./scripts/train_finetune.sh runs/g2p-classifier/checkpoint-5000
 ```
 
 ## Upload Checkpoint to HuggingFace
 
 ```console
-./scripts/ckpt_upload.sh outputs/g2p-classifier/checkpoint-5000
+./scripts/ckpt_upload.sh runs/g2p-classifier/checkpoint-5000
 ```
 
 ## Export to ONNX
@@ -31,9 +31,9 @@
 From the repository root, pass a checkpoint directory (paths relative to the repo root). An optional second argument sets the output filename (default `model.onnx`, written under `renikud-onnx/`).
 
 ```console
-./scripts/ckpt_export.sh outputs/g2p-augmented/checkpoint-1500
-./scripts/ckpt_export.sh outputs/g2p-classifier/checkpoint-5000
-./scripts/ckpt_export.sh outputs/g2p-augmented/checkpoint-1500 my-model.onnx
+./scripts/ckpt_export.sh runs/g2p-augmented/checkpoint-1500
+./scripts/ckpt_export.sh runs/g2p-classifier/checkpoint-5000
+./scripts/ckpt_export.sh runs/g2p-augmented/checkpoint-1500 my-model.onnx
 ```
 
 The script wraps `renikud-onnx/scripts/export.py`. Vocabulary and related metadata are embedded in the `.onnx` file, so no extra files are needed at inference time.
@@ -43,10 +43,10 @@ The script wraps `renikud-onnx/scripts/export.py`. Vocabulary and related metada
 Run the Hebrew G2P benchmark against a checkpoint. If `gt.tsv` is missing in the repo root, the script downloads it from [heb-g2p-benchmark](https://github.com/thewh1teagle/heb-g2p-benchmark).
 
 ```console
-./scripts/train_bench.sh outputs/g2p-classifier/checkpoint-5000
+./scripts/train_bench.sh runs/g2p-classifier/checkpoint-5000
 ```
 
-Optional: `./scripts/train_bench.sh outputs/g2p-classifier/checkpoint-5000 --save report.txt`
+Optional: `./scripts/train_bench.sh runs/g2p-classifier/checkpoint-5000 --save report.txt`
 
 ## Download Checkpoint
 

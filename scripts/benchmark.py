@@ -5,7 +5,7 @@ Download benchmark data first:
     wget https://raw.githubusercontent.com/thewh1teagle/heb-g2p-benchmark/refs/heads/main/web/data/gt.tsv
 
 Usage:
-    uv run scripts/benchmark_classifier.py --checkpoint outputs/g2p-classifier/checkpoint-5000 --gt gt.tsv
+    uv run scripts/benchmark_classifier.py --checkpoint runs/g2p-classifier/checkpoint-5000 --gt gt.tsv
 """
 
 import argparse

@@ -10,8 +10,8 @@ that are otherwise valid pronunciations.
 
 Usage:
     uv run scripts/extract_pairs_clean.py \
-      dataset/voxknesset-whisper-abjad-he-ipa-normalized.tsv \
-      dataset/voxknesset-whisper-abjad-he-ipa-pairs-clean.tsv
+      data/voxknesset-whisper-abjad-he-ipa-normalized.tsv \
+      data/voxknesset-whisper-abjad-he-ipa-pairs-clean.tsv
 """
 
 from __future__ import annotations

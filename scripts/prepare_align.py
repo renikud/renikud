@@ -18,9 +18,11 @@ MARKERS = "".join(ORTHOGRAPHIC_MARKERS)
 HEB_RE = re.compile(rf"[^\u05d0-\u05ea{re.escape(MARKERS)}]")
 IPA_RE = re.compile(r"[^abdefghijklmnoprstuvwzɡʁʃʒʔˈχ]")
 NIKUD_RE = re.compile(r"[\p{M}|]")
+BIDI_RE = re.compile(r"[\u200e\u200f\u202a-\u202e\u2066-\u2069]")
 
 def normalize(text: str) -> str:
     text = NIKUD_RE.sub("", unicodedata.normalize("NFD", text))
+    text = BIDI_RE.sub("", text)
     text = normalize_graphemes(text)
     # Treat hyphens as word boundaries
     text = text.replace("-", " ")
