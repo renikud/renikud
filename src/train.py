@@ -43,6 +43,11 @@ def should_eval_now(accelerator: Accelerator, last_eval_at: float, interval_seco
     return bool(broadcast(due_tensor, from_process=0).item())
 
 
+def broadcast_stop(accelerator: Accelerator, stop: bool, device) -> bool:
+    stop_tensor = torch.tensor(int(stop), device=device)
+    return bool(broadcast(stop_tensor, from_process=0).item())
+
+
 def main():
     args = parse_args()
     output_dir = Path(args.output_dir)
@@ -88,7 +93,7 @@ def main():
 
     global_step = opt_step * args.gradient_accumulation_steps
     optimizer.zero_grad()
-    eval_interval_seconds = args.eval_minutes * 60.0
+    eval_interval_seconds = args.eval_seconds
     last_eval_at = time.monotonic()
 
     for epoch in range(math.ceil(args.epochs)):
@@ -139,7 +144,7 @@ def main():
                 if should_eval_now(accelerator, last_eval_at, eval_interval_seconds, device):
                     accelerator.wait_for_everyone()
                     if accelerator.is_main_process:
-                        evaluate_and_save(
+                        should_stop = evaluate_and_save(
                             accelerator,
                             model,
                             eval_loader,
@@ -152,8 +157,16 @@ def main():
                             f"step {opt_step}",
                             eval_state,
                         )
+                    else:
+                        should_stop = False
                     accelerator.wait_for_everyone()
+                    should_stop = broadcast_stop(accelerator, should_stop, device)
                     last_eval_at = time.monotonic()
+                    if should_stop:
+                        accelerator.wait_for_everyone()
+                        if writer is not None:
+                            writer.close()
+                        return
 
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:

@@ -98,7 +98,7 @@ def evaluate_and_save(
     opt_step: int,
     label: str,
     state: dict,
-) -> None:
+) -> bool:
     metrics = evaluate(accelerator.unwrap_model(model), eval_loader, device, args.fp16, tokenizer)
     log_eval_metrics(metrics, writer, opt_step, label)
     unwrapped_model = accelerator.unwrap_model(model)
@@ -129,3 +129,10 @@ def evaluate_and_save(
             f"best: {state['best_acc'] * 100:.2f}% @ step {state['best_wer_step']}  "
             f"(stuck for {state['no_improve_count']} evals)"
         )
+    if args.early_stopping_patience > 0 and state["no_improve_count"] >= args.early_stopping_patience:
+        print(
+            f"[step {opt_step}] early stopping: no WER improvement for "
+            f"{state['no_improve_count']} evals"
+        )
+        return True
+    return False
