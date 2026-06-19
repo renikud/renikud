@@ -19,7 +19,7 @@
     🌐 Project Page
   </a>
   &nbsp; | &nbsp;
-  <a target="_blank" href="https://arxiv.org/pdf/2506.12311">
+  <a target="_blank" href="https://arxiv.org/pdf/2606.20179">
     📄 Research Paper
   </a>
 </p>
@@ -68,5 +68,5 @@ See `docs/TRAINING.md` for data preparation, training commands, upload/download,
   title={ReNikud: Audio-Supervised Hebrew Grapheme-to-Phoneme Conversion},
   author={Maxim Melichov and Yakov Kolani and Morris Alper},
   year={2026},
-  note={Code and models forthcoming},
+  url={https://arxiv.org/pdf/2606.20179},
 }
