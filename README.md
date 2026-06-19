@@ -61,6 +61,10 @@ See `docs/ARCHITECTURE.md` for model design and implementation details.
 
 See `docs/TRAINING.md` for data preparation, training commands, upload/download, ONNX export, benchmark, and hyperparameters.
 
+## License
+
+This project is licensed under the Creative Commons Attribution 4.0 International license (CC BY 4.0). See [LICENSE](LICENSE).
+
 ## Citation
 
 ```bibtex
@@ -70,3 +74,4 @@ See `docs/TRAINING.md` for data preparation, training commands, upload/download,
   year={2026},
   url={https://arxiv.org/pdf/2606.20179},
 }
+```

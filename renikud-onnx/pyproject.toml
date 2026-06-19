@@ -3,6 +3,7 @@ name = "renikud-onnx"
 version = "0.1.0"
 description = "G2P in Hebrew"
 readme = "README.md"
+license = "CC-BY-4.0"
 authors = [
     { name = "yakov", email = "61390950+thewh1teagle@users.noreply.github.com" }
 ]
