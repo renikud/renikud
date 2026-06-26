@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vast AI Train"
+  short_description: "Train models on Vast.ai GPU instances"
+  default_prompt: "Use $vast-ai-train to prepare a Vast.ai machine and start a remote training run."
