@@ -8,18 +8,24 @@ from transformers import get_cosine_schedule_with_warmup
 from model import G2PModel
 
 
-def build_optimizer(model: G2PModel, encoder_lr: float, head_lr: float, weight_decay: float) -> torch.optim.AdamW:
-    """AdamW with discriminative LRs: lower for encoder, higher for classification heads."""
+def build_optimizer(model: G2PModel, lr: float, weight_decay: float) -> torch.optim.AdamW:
+    """AdamW for the trainable context module and classification heads."""
     no_decay = {"bias", "LayerNorm.weight", "layer_norm.weight", "norm.weight"}
 
     def is_no_decay(name: str) -> bool:
         return any(term in name for term in no_decay)
 
     return torch.optim.AdamW([
-        {"params": [p for n, p in model.encoder.named_parameters() if not is_no_decay(n)], "lr": encoder_lr, "weight_decay": weight_decay},
-        {"params": [p for n, p in model.encoder.named_parameters() if is_no_decay(n)], "lr": encoder_lr, "weight_decay": 0.0},
-        {"params": [p for n, p in model.named_parameters() if not n.startswith("encoder.") and not is_no_decay(n)], "lr": head_lr, "weight_decay": weight_decay},
-        {"params": [p for n, p in model.named_parameters() if not n.startswith("encoder.") and is_no_decay(n)], "lr": head_lr, "weight_decay": 0.0},
+        {
+            "params": [p for n, p in model.named_parameters() if p.requires_grad and not is_no_decay(n)],
+            "lr": lr,
+            "weight_decay": weight_decay,
+        },
+        {
+            "params": [p for n, p in model.named_parameters() if p.requires_grad and is_no_decay(n)],
+            "lr": lr,
+            "weight_decay": 0.0,
+        },
     ])
 
 

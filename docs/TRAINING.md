@@ -91,9 +91,8 @@ uv run python -c "import flash_attn; print(flash_attn.__version__)"
 
 ## Learning Rates
 
-- `--encoder-lr 2e-5` — default encoder learning rate
-- `--head-lr 1e-4` — higher LR for the three classification heads
-- For fine-tuning use lower rates: `--encoder-lr 2e-6 --head-lr 1e-5`
+- `--lr 1e-4` — default learning rate for the trainable context stack and classification heads
+- The DictaBERT encoder is frozen and excluded from the optimizer.
 
 ## Data Format
 

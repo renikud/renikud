@@ -15,8 +15,7 @@ def parse_args():
     parser.add_argument("--train-batch-size", type=int, default=16)
     parser.add_argument("--eval-batch-size", type=int, default=16)
     parser.add_argument("--epochs", type=float, default=3.0)
-    parser.add_argument("--encoder-lr", type=float, default=2e-5)
-    parser.add_argument("--head-lr", type=float, default=1e-4)
+    parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--weight-decay", type=float, default=0.01)
     parser.add_argument("--warmup-steps", type=int, default=200)
     parser.add_argument("--logging-steps", type=int, default=50)
@@ -24,7 +23,6 @@ def parse_args():
     parser.add_argument("--early-stopping-patience", type=int, default=0, help="Stop after this many evals without WER improvement; 0 disables")
     parser.add_argument("--gradient-accumulation-steps", type=int, default=1)
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
-    parser.add_argument("--freeze-encoder-steps", type=int, default=0)
     parser.add_argument("--resume", type=str, default=None)
     parser.add_argument("--reset-steps", action="store_true", default=False, help="Load weights from checkpoint but reset step counter and scheduler (for finetuning on new data)")
     parser.add_argument(

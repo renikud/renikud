@@ -66,18 +66,17 @@ def main():
 
     if args.resume:
         state = load_file(str(Path(args.resume) / "model.safetensors"), device="cpu")
-        model.load_state_dict(state, strict=False)
+        model.load_state_dict(state)
         if accelerator.is_main_process:
             print(f"Loaded weights from {args.resume}")
 
-    if args.freeze_encoder_steps > 0:
-        for p in model.encoder.parameters():
-            p.requires_grad_(False)
-        if accelerator.is_main_process:
-            print("Encoder frozen.")
+    if accelerator.is_main_process:
+        trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        frozen_params = sum(p.numel() for p in model.parameters() if not p.requires_grad)
+        print(f"Trainable params: {trainable_params:,}; frozen encoder params: {frozen_params:,}")
 
     total_opt_steps = math.ceil(len(train_loader) * args.epochs / args.gradient_accumulation_steps)
-    optimizer = build_optimizer(model, args.encoder_lr, args.head_lr, args.weight_decay)
+    optimizer = build_optimizer(model, args.lr, args.weight_decay)
     scheduler = build_scheduler(optimizer, args.warmup_steps, total_opt_steps)
 
     model, optimizer, train_loader, eval_loader, scheduler = accelerator.prepare(
@@ -105,12 +104,6 @@ def main():
             if opt_step >= total_opt_steps:
                 break
 
-            if args.freeze_encoder_steps > 0 and global_step == args.freeze_encoder_steps:
-                for p in accelerator.unwrap_model(model).encoder.parameters():
-                    p.requires_grad_(True)
-                if accelerator.is_main_process:
-                    print(f"\n[step {opt_step}] Encoder unfrozen.")
-
             batch.pop("texts")
             batch.pop("phonemes")
             with accelerator.autocast():
@@ -133,13 +126,12 @@ def main():
                 pbar.set_postfix(
                     step=opt_step,
                     loss=f"{train_loss:.4f}",
-                    enc_lr=f"{optimizer.param_groups[0]['lr']:.2e}",
-                    head_lr=f"{optimizer.param_groups[2]['lr']:.2e}",
+                    lr=f"{optimizer.param_groups[0]['lr']:.2e}",
                 )
 
                 if accelerator.is_main_process:
                     if opt_step % args.logging_steps == 0:
-                        log_train_metrics(train_loss, optimizer.param_groups[0]["lr"], optimizer.param_groups[2]["lr"], writer, opt_step)
+                        log_train_metrics(train_loss, optimizer.param_groups[0]["lr"], writer, opt_step)
 
                 if should_eval_now(accelerator, last_eval_at, eval_interval_seconds, device):
                     accelerator.wait_for_everyone()

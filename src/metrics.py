@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 
-def log_train_metrics(loss, enc_lr, head_lr, writer, opt_step):
-    print(f"[step {opt_step}] train_loss={loss:.4f} lr_encoder={enc_lr:.2e} lr_head={head_lr:.2e}")
+def log_train_metrics(loss, lr, writer, opt_step):
+    print(f"[step {opt_step}] train_loss={loss:.4f} lr={lr:.2e}")
     writer.add_scalar("train/loss", loss, opt_step)
-    writer.add_scalar("train/lr_encoder", enc_lr, opt_step)
-    writer.add_scalar("train/lr_head", head_lr, opt_step)
+    writer.add_scalar("train/lr", lr, opt_step)
 
 
 def log_eval_metrics(metrics, writer, opt_step, label):
