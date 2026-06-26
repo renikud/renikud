@@ -62,7 +62,10 @@ def main():
 
     train_loader, eval_loader = make_dataloaders(args)
 
-    model = G2PModel(flash_attention=args.flash_attention)
+    model = G2PModel(
+        flash_attention=args.flash_attention,
+        unfreeze_encoder_layers=args.unfreeze_encoder_layers,
+    )
 
     if args.resume:
         state = load_file(str(Path(args.resume) / "model.safetensors"), device="cpu")
@@ -73,7 +76,10 @@ def main():
     if accelerator.is_main_process:
         trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
         frozen_params = sum(p.numel() for p in model.parameters() if not p.requires_grad)
-        print(f"Trainable params: {trainable_params:,}; frozen encoder params: {frozen_params:,}")
+        print(
+            f"Trainable params: {trainable_params:,}; frozen params: {frozen_params:,}; "
+            f"unfrozen encoder layers: {args.unfreeze_encoder_layers}"
+        )
 
     total_opt_steps = math.ceil(len(train_loader) * args.epochs / args.gradient_accumulation_steps)
     optimizer = build_optimizer(model, args.lr, args.weight_decay)

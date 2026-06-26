@@ -22,13 +22,20 @@ class G2PModel(nn.Module):
     through unchanged at inference — the heads are never called for them.
     """
 
-    def __init__(self, dropout_rate: float = 0.1, flash_attention: bool = False) -> None:
+    def __init__(
+        self,
+        dropout_rate: float = 0.1,
+        flash_attention: bool = False,
+        unfreeze_encoder_layers: int = 0,
+    ) -> None:
         super().__init__()
 
         self.encoder = build_encoder(flash_attention=flash_attention)
+        self.unfreeze_encoder_layers = unfreeze_encoder_layers
         for param in self.encoder.parameters():
             param.requires_grad_(False)
-        self.encoder.eval()
+        self._unfreeze_top_encoder_layers()
+        self._set_encoder_train_mode(False)
 
         hidden_size = self.encoder.config.hidden_size
 
@@ -51,9 +58,37 @@ class G2PModel(nn.Module):
 
         self._consonant_mask: torch.Tensor = build_consonant_mask()
 
+    def _encoder_layers(self) -> nn.ModuleList:
+        layers = getattr(getattr(self.encoder, "encoder", None), "layer", None)
+        if layers is None:
+            raise ValueError("Expected encoder.encoder.layer to unfreeze top encoder layers")
+        return layers
+
+    def _unfreeze_top_encoder_layers(self) -> None:
+        if self.unfreeze_encoder_layers <= 0:
+            return
+
+        layers = self._encoder_layers()
+        if self.unfreeze_encoder_layers > len(layers):
+            raise ValueError(
+                f"Cannot unfreeze {self.unfreeze_encoder_layers} encoder layers; encoder has {len(layers)} layers"
+            )
+
+        for layer in layers[-self.unfreeze_encoder_layers:]:
+            for param in layer.parameters():
+                param.requires_grad_(True)
+
+    def _set_encoder_train_mode(self, mode: bool) -> None:
+        self.encoder.eval()
+        if not mode or self.unfreeze_encoder_layers <= 0:
+            return
+
+        for layer in self._encoder_layers()[-self.unfreeze_encoder_layers:]:
+            layer.train()
+
     def train(self, mode: bool = True):
         super().train(mode)
-        self.encoder.eval()
+        self._set_encoder_train_mode(mode)
         return self
 
     def forward(
@@ -65,7 +100,8 @@ class G2PModel(nn.Module):
         stress_labels: torch.Tensor | None = None,
         tokenizer_vocab: dict[int, str] | None = None,
     ) -> dict[str, torch.Tensor]:
-        with torch.no_grad():
+        encoder_grad = self.unfreeze_encoder_layers > 0
+        with torch.set_grad_enabled(encoder_grad):
             encoder_outputs = self.encoder(
                 input_ids=input_ids,
                 attention_mask=attention_mask,

@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
     parser.add_argument("--resume", type=str, default=None)
     parser.add_argument("--reset-steps", action="store_true", default=False, help="Load weights from checkpoint but reset step counter and scheduler (for finetuning on new data)")
+    parser.add_argument("--unfreeze-encoder-layers", type=int, default=0, help="Train the top N encoder layers while keeping the rest frozen")
     parser.add_argument(
         "--fp16",
         action=argparse.BooleanOptionalAction,
