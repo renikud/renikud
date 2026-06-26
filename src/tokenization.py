@@ -1,4 +1,4 @@
-"""Tokenizer for Hebrew G2P - wraps dicta-il/dictabert-large-char-menaked tokenizer."""
+"""Tokenizer for Hebrew G2P - wraps dicta-il/dictabert-large-char tokenizer."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from tokenizers import Regex
 from transformers import AutoTokenizer, PreTrainedTokenizerFast
 
 
-MODEL_NAME = "dicta-il/dictabert-large-char-menaked"
+MODEL_NAME = "dicta-il/dictabert-large-char"
 
 
 def id_to_token(tokenizer) -> dict[int, str]:
@@ -19,7 +19,7 @@ def id_to_token(tokenizer) -> dict[int, str]:
 
 @lru_cache(maxsize=None)
 def load_tokenizer() -> PreTrainedTokenizerFast:
-    tok = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
+    tok = AutoTokenizer.from_pretrained(MODEL_NAME)
     # BertPreTokenizer splits on whitespace before WordPiece, collapsing Hebrew
     # words to [UNK]. Replace with a character-level splitter so each character
     # gets its own token with correct offset_mapping.

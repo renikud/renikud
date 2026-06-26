@@ -14,7 +14,7 @@ This works because Hebrew has a nearly one-to-one letter→phoneme structure: ea
 
 `G2PModel` in `src/model.py`:
 
-1. **Frozen encoder** — `dicta-il/dictabert-large-char-menaked` loaded through Hugging Face `AutoModel` with remote code. `src/encoder.py` returns the bare BERT encoder body, without the nikud prediction heads. Encoder parameters are frozen and kept in eval mode during training.
+1. **Frozen encoder** — `dicta-il/dictabert-large-char` loaded through Hugging Face `AutoModel`. `src/encoder.py` returns the bare encoder body, without an MLM head. Encoder parameters are frozen and kept in eval mode during training.
 2. **Trainable context stack** — a 2-layer Transformer encoder on top of DictaBERT hidden states. It uses `d_model=hidden_size`, `nhead=16`, and `dim_feedforward=2816`, for roughly 20M trainable task-specific parameters before the small output classifiers.
 3. **Three coupled classification heads** — each head sees the contextual hidden state *plus* the raw logits from the previous head, so later heads have information about earlier predictions rather than being blind to them:
    - **Consonant head** → `hidden` → 26 classes (`∅ b v d h z χ t j k l m n s f p ts tʃ w ʔ ɡ ʁ ʃ ʒ dʒ`)
