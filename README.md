@@ -15,12 +15,14 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/IEEE_SLT-2026-blue" alt="IEEE SLT 2026" />
+  &nbsp;
   <a target="_blank" href="https://renikud.github.io">
-    🌐 Project Page
+    <img src="https://img.shields.io/badge/🌐_Project-Page-green" alt="Project Page" />
   </a>
-  &nbsp; | &nbsp;
-  <a target="_blank" href="https://arxiv.org/pdf/2606.20179">
-    📄 Research Paper
+  &nbsp;
+  <a target="_blank" href="https://arxiv.org/abs/2606.20179">
+    <img src="https://img.shields.io/badge/arXiv-2606.20179-b31b1b" alt="arXiv" />
   </a>
 </p>
 
@@ -68,9 +70,10 @@ This project is licensed under the Creative Commons Attribution 4.0 Internationa
 ## Citation
 
 ```bibtex
-@misc{melichov2026renikud,
+@inproceedings{melichov2026renikud,
   title={ReNikud: Audio-Supervised Hebrew Grapheme-to-Phoneme Conversion},
   author={Maxim Melichov and Yakov Kolani and Morris Alper},
+  booktitle={Proc. IEEE SLT 2026},
   year={2026},
   url={https://arxiv.org/pdf/2606.20179},
 }
