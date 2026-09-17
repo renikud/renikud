@@ -13,7 +13,7 @@ Hebrew G2P + TTS demo using renikud-onnx and zipvoice-onnx.
 English words in the input are phonemized via espeak before passing to the Hebrew TTS.
 
 Setup:
-    wget https://huggingface.co/thewh1teagle/renikud/resolve/main/model.onnx -O renikud.onnx
+    wget https://huggingface.co/renikud/renikud/resolve/main/model.onnx -O renikud.onnx
     wget https://github.com/thewh1teagle/zipvoice-onnx/releases/download/model-files-v1.0/prompt_hebrew_male1.wav -O prompt.wav
     wget https://github.com/thewh1teagle/zipvoice-onnx/releases/download/model-files-v1.0/vocos_24khz.onnx
 

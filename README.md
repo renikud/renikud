@@ -38,17 +38,16 @@
 
 ## Usage
 
-Inference is published as **`renikud-onnx`** on PyPI. Install and download the ONNX weights from Hugging Face (they are not bundled with the wheel):
+Inference is published as **`renikud-onnx`** on PyPI. The ONNX weights are fetched from Hugging Face on first use and cached locally (pass a path to `G2P(...)` to use a local file instead):
 
 ```console
-pip install renikud-onnx
-wget https://huggingface.co/thewh1teagle/renikud/resolve/main/model.onnx -O model.onnx
+uv pip install renikud-onnx
 ```
 
 ```python
 from renikud_onnx import G2P
 
-g2p = G2P("model.onnx")
+g2p = G2P()
 print(g2p.phonemize("שלום עולם"))
 # → ʃalˈom ʔolˈam
 ```

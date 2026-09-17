@@ -13,21 +13,27 @@ Hebrew grapheme-to-phoneme (G2P) inference via ONNX. Converts unvocalized Hebrew
 ## Install
 
 ```console
-pip install renikud-onnx
-```
-
-Download the model file from Hugging Face:
-
-```console
-wget https://huggingface.co/thewh1teagle/renikud/resolve/main/model.onnx -O model.onnx
+uv pip install renikud-onnx
 ```
 
 ## Usage
 
+The model is fetched from [Hugging Face](https://huggingface.co/renikud/renikud) on first use:
+
 ```python
 from renikud_onnx import G2P
 
-g2p = G2P("model.onnx")
+g2p = G2P()
 print(g2p.phonemize("שלום עולם"))
 # → ʃalˈom ʔolˈam
+```
+
+Or pass a local model path:
+
+```console
+wget https://huggingface.co/renikud/renikud/resolve/main/model.onnx -O model.onnx
+```
+
+```python
+g2p = G2P("model.onnx")
 ```

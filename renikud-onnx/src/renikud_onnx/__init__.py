@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 import unicodedata
+from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
@@ -13,6 +14,8 @@ ALEF_ORD = ord("א")
 TAF_ORD = ord("ת")
 STRESS_MARK = "ˈ"
 ORTHOGRAPHIC_MARKERS = ("'", '"')
+HF_REPO_ID = "renikud/renikud"
+HF_MODEL_FILENAME = "model.onnx"
 
 
 def _is_hebrew(char: str) -> bool:
@@ -25,9 +28,24 @@ def normalize_graphemes(text: str) -> str:
     return text
 
 
+def download_model(repo_id: str = HF_REPO_ID, filename: str = HF_MODEL_FILENAME) -> str:
+    """Download the ONNX model from the Hugging Face Hub (cached after the first call)."""
+    from huggingface_hub import hf_hub_download
+
+    return hf_hub_download(repo_id=repo_id, filename=filename)
+
+
 class G2P:
-    def __init__(self, model_path: str) -> None:
-        self._session = ort.InferenceSession(model_path)
+    def __init__(self, model_path: str | Path | None = None) -> None:
+        """Load the G2P model.
+
+        Args:
+            model_path: Path to a local ``model.onnx``. If omitted, the model is
+                fetched from the Hugging Face Hub and cached locally.
+        """
+        if model_path is None:
+            model_path = download_model()
+        self._session = ort.InferenceSession(str(model_path))
         meta = self._session.get_modelmeta().custom_metadata_map
         self._vocab: dict[str, int] = json.loads(meta["vocab"])
         self._consonant_vocab: dict[int, str] = {int(k): v for k, v in json.loads(meta["consonant_vocab"]).items()}
