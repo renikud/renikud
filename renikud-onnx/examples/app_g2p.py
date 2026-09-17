@@ -13,7 +13,7 @@ Hebrew G2P demo using renikud-onnx.
 English words in the input are phonemized via espeak before passing to the Hebrew G2P.
 
 Setup:
-    wget https://huggingface.co/thewh1teagle/renikud/resolve/main/model.onnx -O renikud.onnx
+    wget https://huggingface.co/renikud/renikud/resolve/main/model.onnx -O renikud.onnx
 
 Usage:
     uv run examples/app_g2p.py

@@ -1,5 +1,5 @@
 /*
-wget https://huggingface.co/thewh1teagle/renikud/resolve/main/model.onnx
+wget https://huggingface.co/renikud/renikud/resolve/main/model.onnx
 cargo run --example basic
 */
 
