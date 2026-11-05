@@ -11,8 +11,7 @@ wheels/
 
 *.7z
 *.txt
-plans/*
-!plans/.gitkeep
+plans/
 data/
 dataset_finetune/
 checkpoint/
