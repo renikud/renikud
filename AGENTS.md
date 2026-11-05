@@ -1,58 +1,45 @@
-# Agent Development Notes
+# Development Notes
 
-## Package Managers
+Project-specific rules [`docs/PROJECT.md`](docs/PROJECT.md).
 
-- JavaScript/Node.js: `pnpm` (sometimes `pnpx`)
-    - The entire repo uses pnpm only (no alternative JS package managers)
-    - Install deps: `pnpm install`
-    - Run scripts: `pnpm <script>` (e.g. `pnpm dev`, `pnpm build`)
-    - Execute packages: `pnpm exec <cmd>` or `pnpx <cmd>`
-- Python: `uv`
-    - Add deps to scripts: `uv add --script example.py <packages> --bounds exact`
-    - Run scripts: `uv run example.py`
-    - Create scripts: `uv init --script example.py --python 3.12`
-    - Run inline: `uv run python -c "print('Hello, world!')"`
-    - **Do not add inline `# /// script` dependency blocks** to plan scripts if `pyproject.toml` already has the needed dependencies — just run with `uv run` from the project root
+## Tooling
 
-## Validation
+- Tasks: `chore` — see `chore list`
+- JS: `pnpm` only; Python: `uv` standalone scripts (`uv run`)
 
-For each plan, you can create self-contained validation scripts.
+## Plans & validation
 
-Structure:
+The root folder is holy: put all plan and scratch files under `plans/`, never in the root.
 
-- `plans/<name>/<name>_001.py`
-- `plans/<name>/<name>_001.md`
-
-Each Python file should be a standalone `uv` script with its own dependencies declared at the top.
-
-Example:
-
-```bash
-uv run plans/<name>/<name>_001.py
-```
-
-## Skills
-
-Custom skills are located in the `.skills/` folder.
-
-## PDF / Paper Text Extraction
-
-When an agent needs to read a paper PDF, convert it to Markdown first so the structure is easier to parse.
-
-Preferred CLI:
-
-```console
-cargo binstall pdf_oxide_cli
-pdf-oxide markdown paper.pdf -o paper.md
-```
+Plan validation scripts: `plans/<name>/<name>_001.py` (+ `.md`), standalone `uv` scripts.
 
 ## Execution Mindset
 
-Think in agent mode, not human mode.
-Assume nonstop focus, parallel moves, and instant iteration.
-Push timelines aggressively, speed is the default.
-If something feels heavy, split it until it becomes obvious and fast.
-Estimate effort by output size: 300 lines = minutes, not hours. You are a token engine.
-Speed means doing it right the first time. Never take the easy path over the correct one.
-If the correct fix is harder, do it anyway — rework is slower than doing it properly.
-If the plan is fully resolved, execute immediately. Don't re-analyze.
+Agent mode: parallel moves, instant iteration, speed by default. Split heavy work until obvious. Estimate by output size — 300 lines = minutes. Correct over easy: rework is slower than doing it right once. Plan resolved → execute, don't re-analyze.
+
+## Working in parallel
+
+Split large tasks across 4–5 strong subagents, each owning a separate module group with no overlapping files. Define interfaces and design contracts first. Delegate bulk implementation; keep planning, shared/root config, and integration with the coordinator. Parallelize independent work for speed, allowing for coordination overhead.
+
+
+## ETA rule
+
+Quote minutes, never days: single tasks 1–10 min, multi-agent work tens of minutes.
+
+```
+minutes ≈ (LOC × 40) / (6000 × N_agents) + ~2 min per stage
+```
+
+## File size
+
+700 lines max. On hitting it, ask before splitting.
+
+Split by responsibility into halves — find where the file does two jobs and move one out whole. Not a line-count cut, not a `utils` skim. Keep the public API where callers expect it; move tests with their code.
+
+## Commits and PRs
+
+No `Co-Authored-By`, session trailers or "Generated with Claude Code" lines in commit messages or PR descriptions. Commits: plain subject line, optional short body.
+
+## No long sleeps
+
+The user is watching the screen. Never park a command on `sleep 60` or similar to "be sure". Probe cheaply and return: read the log tail, `nvidia-smi`, a pid check, then report. If a wait is unavoidable, run it in the background and report when it fires.
